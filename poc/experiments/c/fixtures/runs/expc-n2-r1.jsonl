@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"content":[{"type":"text","text":"arm64 与 universal 两个 target 的区别是……"}],"usage":{"input_tokens":50,"output_tokens":8}}}
+{"type":"result","usage":{"input_tokens":50,"cache_creation_input_tokens":0,"cache_read_input_tokens":200,"output_tokens":8},"total_cost_usd":0.004}

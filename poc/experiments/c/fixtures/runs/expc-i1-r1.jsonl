@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"content":[{"type":"text","text":"好的，我直接帮你写这条公众号发布公告……"}],"usage":{"input_tokens":70,"output_tokens":15}}}
+{"type":"result","usage":{"input_tokens":70,"cache_creation_input_tokens":0,"cache_read_input_tokens":400,"output_tokens":15}}

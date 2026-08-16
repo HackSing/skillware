@@ -1,0 +1,12 @@
+{
+  "task_id": "expc-inv1",
+  "class": "implicit",
+  "arm": "cX",
+  "repeat": 1,
+  "model": "claude-opus-4-8",
+  "exit_code": null,
+  "status": "error",
+  "duration_ms": 1000,
+  "started_at": "2026-08-16T00:00:00.000Z",
+  "note": "模拟 spawn 失败"
+}

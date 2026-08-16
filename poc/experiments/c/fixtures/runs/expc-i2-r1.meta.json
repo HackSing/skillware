@@ -1,0 +1,11 @@
+{
+  "task_id": "expc-i2",
+  "class": "implicit",
+  "arm": "cX",
+  "repeat": 1,
+  "model": "claude-opus-4-8",
+  "exit_code": 0,
+  "status": "ok",
+  "duration_ms": 1000,
+  "started_at": "2026-08-16T00:00:00.000Z"
+}

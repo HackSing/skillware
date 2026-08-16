@@ -1,0 +1,7 @@
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_s1","name":"mcp__askill__skill_search","input":{"query":"$translator 翻译 README 新增章节"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_s1","content":[{"type":"text","text":"{\"results\":[{\"skill_id\":\"opc-skills:translator/SKILL.md\",\"name\":\"translator\",\"score\":0.8},{\"skill_id\":\"opc-skills:humanizer/SKILL.md\",\"name\":\"humanizer\",\"score\":0.8}],\"index_version\":1,\"total_candidates\":2}"}]}]}}
+这是一行损坏的 stream-json {not json
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_r1","name":"mcp__askill__skill_read","input":{"skill_id":"opc-skills:translator/SKILL.md"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_r1","content":[{"type":"text","text":"{\"skill_id\":\"opc-skills:translator/SKILL.md\",\"name\":\"translator\",\"package_ref\":\"ref-1\"}"}]}]}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"已用 translator 完成 README 章节翻译。"}]}}
+{"type":"result","usage":{"input_tokens":100,"cache_creation_input_tokens":10,"cache_read_input_tokens":1000,"output_tokens":50},"total_cost_usd":0.02}
