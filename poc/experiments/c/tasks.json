@@ -1,0 +1,276 @@
+{
+  "version": "1",
+  "created": "2026-08-16",
+  "tasks": [
+    {
+      "id": "expc-001",
+      "class": "explicit",
+      "text": "$translator 把 README 新增的章节翻成英文。",
+      "expected_skills": ["translator"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "显式点名 translator"
+    },
+    {
+      "id": "expc-002",
+      "class": "explicit",
+      "text": "用 image-tools 从 assets/logo.png 出一套 macOS 应用图标。",
+      "expected_skills": ["image-tools"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "显式点名 image-tools"
+    },
+    {
+      "id": "expc-003",
+      "class": "explicit",
+      "text": "$repo-vetter 帮我审查这个准备加入预装清单的社区插件仓库。",
+      "expected_skills": ["repo-vetter"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "显式点名 repo-vetter"
+    },
+    {
+      "id": "expc-004",
+      "class": "explicit",
+      "text": "用 social-writer 写一条 dsh-buddy 0.2 版本的公众号中文发布文案。",
+      "expected_skills": ["social-writer"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "显式点名 social-writer"
+    },
+    {
+      "id": "expc-005",
+      "class": "explicit",
+      "text": "$seo-audit 给 dsh-buddy 官网首页做一次完整的页面 SEO 审计。",
+      "expected_skills": ["seo-audit"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "显式点名 seo-audit"
+    },
+    {
+      "id": "expc-006",
+      "class": "explicit",
+      "text": "$changelog-writer 根据最近的 commit 帮我生成一份规范的更新日志。",
+      "expected_skills": ["changelog-writer"],
+      "expect_not_found": true,
+      "max_turns": 4,
+      "notes": "库中不存在的技能名，应报 skill_not_found 而非直接说没有"
+    },
+    {
+      "id": "expc-007",
+      "class": "implicit",
+      "text": "把 README 里『策展承诺』这一节翻成英文，专业术语要和全文其它地方保持一致。",
+      "expected_skills": ["translator"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "章节翻译 -> translator"
+    },
+    {
+      "id": "expc-008",
+      "class": "implicit",
+      "text": "dsh-buddy 马上要发 0.2 版了，帮我写一条发在微信公众号上的中文发布公告，重点讲零依赖和一分钟就能跑起第一个会话。",
+      "expected_skills": ["social-writer"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "自媒体长文/viral -> social-writer"
+    },
+    {
+      "id": "expc-009",
+      "class": "implicit",
+      "text": "有个社区插件我们想加进随包预装清单，在把它的仓库克隆到本机之前，帮我先远程查一下里面有没有藏危险的 AI 工具配置或者协议不干净的问题。",
+      "expected_skills": ["repo-vetter"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "克隆前仓库安全/许可证审查 -> repo-vetter"
+    },
+    {
+      "id": "expc-010",
+      "class": "implicit",
+      "text": "想把项目里钉版的 electron 升到最新的稳定大版本，帮我先评估会不会有破坏性变更，准备好备份和回滚方案，别把现有的打包流程弄坏。",
+      "expected_skills": ["safe-update"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "带备份/回滚的升级 -> safe-update"
+    },
+    {
+      "id": "expc-011",
+      "class": "implicit",
+      "text": "docs/knowledge 下几篇内部规则是随手记的纯文本，帮我整理成结构清晰、带标题层级和摘要的规范 markdown 文档。",
+      "expected_skills": ["content-formatter"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "纯文本整理为规范文档 -> content-formatter"
+    },
+    {
+      "id": "expc-012",
+      "class": "implicit",
+      "text": "README 里这几段读着有明显的机器翻译和 AI 腔调，帮我改写成更自然、像真人写的中文，技术事实别改。",
+      "expected_skills": ["humanizer"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "去 AI 味 -> humanizer"
+    },
+    {
+      "id": "expc-013",
+      "class": "implicit",
+      "text": "把 README 里『发行版的四个职能』那张表，做成一组适合发小红书的图文卡，好让人一眼看懂、方便转发。",
+      "expected_skills": ["card"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "文字表格转分享卡片 -> card"
+    },
+    {
+      "id": "expc-014",
+      "class": "implicit",
+      "text": "dsh-buddy 官网上线前，帮我调研目标用户在搜索引擎里会用哪些词找这类桌面工具，也看看竞品页面覆盖了哪些我们还没写的主题。",
+      "expected_skills": ["seo-research"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "关键词/内容差距调研 -> seo-research"
+    },
+    {
+      "id": "expc-015",
+      "class": "implicit",
+      "text": "帮我把官网下载页的标题标签、页面描述，还有分享到社交平台时显示的卡片信息都调整到位，让它在搜索结果里点击率更高。",
+      "expected_skills": ["seo-optimize"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "meta/OG 优化 -> seo-optimize"
+    },
+    {
+      "id": "expc-016",
+      "class": "implicit",
+      "text": "帮我给这篇讲 dsh-buddy 打包与信任机制的公众号长文，想几个能抓住眼球的题目，再配一句放在封面上的话。",
+      "expected_skills": ["snail"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "长文题目与封面配文 -> snail"
+    },
+    {
+      "id": "expc-017",
+      "class": "implicit",
+      "text": "electron-builder 官方文档那一页，帮我把整页内容取下来转成本地的 markdown 文件存好，方便断网时查阅。",
+      "expected_skills": ["allreader"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "网页转 markdown 归档 -> allreader"
+    },
+    {
+      "id": "expc-018",
+      "class": "implicit",
+      "text": "dsh-buddy 的官网首页现在看着像随便套的模板，帮我重新设计一版更有质感、不那么套路化的落地页。",
+      "expected_skills": ["design-taste-frontend"],
+      "expect_not_found": false,
+      "max_turns": 4,
+      "notes": "反模板前端设计 -> design-taste-frontend"
+    },
+    {
+      "id": "expc-019",
+      "class": "negative",
+      "text": "resolveLauncher 里当 DSH_CMD 为空时，为什么还是走了那条逃生通道？帮我看下这段逻辑。",
+      "expected_skills": [],
+      "expect_not_found": false,
+      "max_turns": 3,
+      "notes": "启动器解析逻辑排查"
+    },
+    {
+      "id": "expc-020",
+      "class": "negative",
+      "text": "electron-builder 打包时 arm64 和 universal 这两个 target 有什么区别？",
+      "expected_skills": [],
+      "expect_not_found": false,
+      "max_turns": 3,
+      "notes": "构建参数事实问答"
+    },
+    {
+      "id": "expc-021",
+      "class": "negative",
+      "text": "把 main.js 里这段关于单实例锁的注释改通顺一点。",
+      "expected_skills": [],
+      "expect_not_found": false,
+      "max_turns": 3,
+      "notes": "注释润色"
+    },
+    {
+      "id": "expc-022",
+      "class": "negative",
+      "text": "翻译这句话：The launcher reuses a live dsh service instead of spawning a new one.",
+      "expected_skills": [],
+      "expect_not_found": false,
+      "max_turns": 3,
+      "notes": "单句翻译，刻意的边界负例，简单翻译不搜索"
+    },
+    {
+      "id": "expc-023",
+      "class": "negative",
+      "text": "git 里怎么把最近三次提交压成一次？",
+      "expected_skills": [],
+      "expect_not_found": false,
+      "max_turns": 3,
+      "notes": "git 操作问答"
+    },
+    {
+      "id": "expc-024",
+      "class": "negative",
+      "text": "package.json 里为什么要把依赖版本钉死成精确版本，而不是用 ^ 范围？",
+      "expected_skills": [],
+      "expect_not_found": false,
+      "max_turns": 3,
+      "notes": "依赖钉版事实问答"
+    },
+    {
+      "id": "expc-025",
+      "class": "negative",
+      "text": "npm run dist 之后产物出现在 dist/mac-arm64 下，这个目录结构是 electron-builder 定的还是可以改？",
+      "expected_skills": [],
+      "expect_not_found": false,
+      "max_turns": 3,
+      "notes": "构建产物目录事实问答"
+    },
+    {
+      "id": "expc-026",
+      "class": "negative",
+      "text": "健康检查那段轮询 DSH_URL 等待服务就绪的超时时间设多少比较合理？",
+      "expected_skills": [],
+      "expect_not_found": false,
+      "max_turns": 3,
+      "notes": "代码设计问答"
+    },
+    {
+      "id": "expc-027",
+      "class": "negative",
+      "text": "用户双击两次时，单实例锁是怎么把焦点聚回已有窗口的？帮我讲讲这段代码。",
+      "expected_skills": [],
+      "expect_not_found": false,
+      "max_turns": 3,
+      "notes": "代码解释"
+    },
+    {
+      "id": "expc-028",
+      "class": "negative",
+      "text": "main.js 顶部的 require 引入顺序帮我按字母排一下。",
+      "expected_skills": [],
+      "expect_not_found": false,
+      "max_turns": 3,
+      "notes": "琐碎代码改动"
+    },
+    {
+      "id": "expc-029",
+      "class": "negative",
+      "text": "退出应用时回收 dsh 进程树用的是哪个信号，SIGTERM 还是 SIGKILL？",
+      "expected_skills": [],
+      "expect_not_found": false,
+      "max_turns": 3,
+      "notes": "运行时事实问答"
+    },
+    {
+      "id": "expc-030",
+      "class": "negative",
+      "text": "plugins/preinstall-manifest.json 里的字段分别是什么意思？给我逐个解释现有字段的作用。",
+      "expected_skills": [],
+      "expect_not_found": false,
+      "max_turns": 3,
+      "notes": "配置字段解释"
+    }
+  ]
+}
