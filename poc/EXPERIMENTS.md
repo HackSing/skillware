@@ -163,7 +163,20 @@ P0 已完成（claude-code 执行器实现，三批全验收，`b8c3163` 合入 
 
 **决策（2026-08-16，用户拍板）**：全量跑批**暂缓**，转入被动轨两周观察，由周报数据驱动后续——若隐式 miss 常见且在乎自动激活，先花 ≈$12 跑隐式 C1×3（36 runs）钉死隐式触发率再迭代文案；BENCHMARK 对外发布前仍需全量跑批（被动轨数据有习惯化偏差，不可作对外证据）。设施与任务集随时可跑，推迟零成本。
 
-待办：被动轨周报（每周，`node poc/experiments/passive/report.mjs`，多项目时按 `--dir` 分别跑）、周报后决策隐式专项/全量、BENCHMARK.md（全量后）。
+待办：被动轨周报（每周，`node poc/experiments/passive/report.mjs --all-projects`）、周报后决策隐式专项/全量、BENCHMARK.md（全量后）。
+
+---
+
+## 多宿主：Kimi Code 接入（2026-08-16）
+
+用户升级为 Claude Code **user 级**注册（所有项目生效，已在 ZBuddy/askill-search 目录实测 Connected）。同日接入第二宿主 **Kimi Code**（VS 插件与 kimi CLI 共用 `~/.kimi-code/`）：
+
+- 配置：`~/.kimi-code/mcp.json` 增加 `askill` 条目（stdio，同一 dist/server.js + 同环境变量；原文件备份 `mcp.json.bak-20260816`）。Kimi 有自己的 `~/.kimi-code/skills/` 全量目录机制，**刻意不用**（收窄版原则）。
+- 端到端验证（kimi CLI 显式任务）：✅ `skill_search` → `skill_read`（入口）→ `skill_read`（`EXTEND.md` 子资源探查）→ 按 translator quick 模式产出翻译。**两宿主同一 MCP 合同吃同一技能库，16.7 多宿主层首个证据。**
+
+开放问题 / 待办：
+- [ ] Kimi 是否注入 MCP `instructions` 未验——本次是显式任务，无法区分它处于 C1 还是 C0 形态；需 Kimi 侧隐式任务或上下文检查来判定（影响 Kimi 被动数据的归类）。
+- [ ] Kimi 会话轨迹在 `~/.kimi-code/sessions/`，格式与 Claude Code 转录不同，周报脚本暂不解析（Kimi 侧使用数据当前只能人工回顾）。
 
 ---
 
