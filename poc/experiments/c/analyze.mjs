@@ -94,6 +94,7 @@ export function parseRun(jsonlText) {
   const pendingSearchNoId = []; // 无 tool_use_id 时按出现顺序回填
   let usage = null; // { input, cache_creation, cache_read, output }
   let totalCostUsd = null;
+  let resultSubtype = null; // result 事件的 subtype：success | error_max_turns | …
 
   for (const raw of lines) {
     const line = raw.trim();
@@ -161,6 +162,7 @@ export function parseRun(jsonlText) {
         output: numOr0(u.output_tokens),
       };
       totalCostUsd = typeof ev.total_cost_usd === 'number' ? ev.total_cost_usd : null;
+      resultSubtype = typeof ev.subtype === 'string' ? ev.subtype : null;
     }
   }
 
@@ -172,6 +174,7 @@ export function parseRun(jsonlText) {
     readCalls,
     usage,
     totalCostUsd,
+    resultSubtype,
   };
 }
 
@@ -206,7 +209,23 @@ function extractResultNames(text) {
 // ---------- 逐 run 判定（按任务 class）----------
 
 export function judgeRun(parsed, task, meta) {
-  const status = meta?.status ?? 'missing_meta';
+  // 有效性以轨迹内 result 事件的 subtype 为准：success 与 error_max_turns（轮次配额
+  // 正常耗尽，claude -p 以非零码退出但轨迹前段完整——正是本实验的测量窗口）都算有效；
+  // 其余 subtype（如 error_during_execution）无效。无 result 事件时回退 meta.status。
+  let status = meta?.status ?? 'missing_meta';
+  let valid;
+  if (parsed.resultSubtype === 'success') {
+    status = 'ok';
+    valid = true;
+  } else if (parsed.resultSubtype === 'error_max_turns') {
+    status = 'max_turns';
+    valid = true;
+  } else if (parsed.resultSubtype !== null) {
+    status = parsed.resultSubtype;
+    valid = false;
+  } else {
+    valid = status === 'ok';
+  }
   const searched = parsed.searchCalls.length > 0;
   const expected = Array.isArray(task?.expected_skills) ? task.expected_skills : [];
   const expectedLc = expected.map((s) => s.toLowerCase());
@@ -233,7 +252,7 @@ export function judgeRun(parsed, task, meta) {
     arm: meta?.arm ?? null,
     repeat: meta?.repeat ?? null,
     status,
-    valid: status === 'ok',
+    valid,
     expect_not_found: !!task?.expect_not_found,
     searched,
     expected_in_top5: expectedInTop5,
@@ -451,7 +470,7 @@ export function renderMarkdown(analysis) {
   lines.push('');
 
   // invalid 清单
-  lines.push('## invalid 清单（error/timeout，不计入分母）');
+  lines.push('## invalid 清单（真错误 / timeout / 无 result 事件，不计入分母；max_turns 属有效）');
   lines.push('');
   const inv = arms.flatMap((a) => a.invalid.map((r) => ({ arm: a.arm, r })));
   if (inv.length === 0) {
