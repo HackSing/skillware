@@ -9,6 +9,14 @@ askill-search 是一个独立于具体业务项目和具体 Agent 宿主的通�
 - [插件产品与技术方案](docs/PLUGIN_SPEC.md)
 - [宿主接入指南](docs/HOST_SETUP.md)——新宿主/新机器挂载 MCP 的步骤、验收清单与常见坑
 
+## 快速上手
+
+```bash
+git clone <本仓库> && cd askill-search/poc && npm ci && npm run build && node scripts/setup.mjs
+```
+
+配置向导只问两件事：你的技能库目录在哪（当场扫描反馈技能数）、接入哪些宿主（自动检测本机的 Claude Code / Kimi Code，回车全选）。写配置前自动备份，结束给出验证与回滚方式。技能库格式与手动接法见[宿主接入指南](docs/HOST_SETUP.md)。
+
 ## 核心边界
 
 - askill-search Core 负责配置、索引、检索、Skill Package 读取和安全边界。
@@ -27,11 +35,11 @@ askill-search 是一个独立于具体业务项目和具体 Agent 宿主的通�
 
 **进度台账（单一真源）：[poc/EXPERIMENTS.md](poc/EXPERIMENTS.md)** ——每个实验做没做、结论是什么、下一步待办，全在这一个文件里滚动记录。
 
-当前走**收窄版**：只做「个人技能库按需搜索」，技能不放宿主自动发现目录（天然绕过实验 B）。真实技能库 = `~/projects/opc-skills`（58 个技能）。
+当前走**收窄版**：只做「个人技能库按需搜索」，技能不放宿主自动发现目录（天然绕过实验 B）。作者以自己的真实私人技能库（58 个技能）作为实验库；库的名称、路径与内容不写入对外文档——askill-search 对用户永远是"接你自己的库"。
 
-- ✅ 阶段 0 POC 已实现（`poc/`）：MCP 双工具（`skill_search`/`skill_read`）协议级验证通过；中文检索 9/9 Top-1（bigram 规则，无 embedding）。
-- ✅ 实验 C（激活有效性）P0 设施就绪：C0/C1 激活文案开关、被动轨周报脚本、30 条固定任务集。方案见 [docs/EXPERIMENT_C_PLAN.md](docs/EXPERIMENT_C_PLAN.md)（实验田 = 在 Claude Code 里开发 dsh-buddy 的真实会话）。
-- ⬜ **等用户做**：真实终端 `cd poc && npm run build`，然后在 dsh-buddy 目录 `claude mcp add askill --env ASKILL_LIBRARY=… --env ASKILL_ACTIVATION=1 -- node …/poc/dist/server.js`（完整命令见 EXPERIMENTS.md 实验 A-2 节）——装完被动轨即开始积累，顺带完成 A-2 宿主级验收。
-- ⬜ 实验 C P1：跑批器 + 判定脚本 + smoke 12 runs + 全量 ~100 runs（Opus 4.8）。
-- ⬜ 实验 D（token 降本）：记账已并入实验 C 两轨，正式 A/B（D-mini 实测基线）待做。
-- 未动工：正式版 Core、配置 CLI、SQLite 索引、Host Adapter、多宿主验收（均在 POC 结论之后）。
+- ✅ 阶段 0 POC（`poc/`）：MCP 双工具协议级验证通过；中文检索 9/9 Top-1（bigram 规则，无 embedding）；块标量描述与点目录排除两缺陷已修。
+- ✅ 实验 C（激活有效性）设施全就绪并出首批实测：C0/C1 文案开关、30 条固定任务集、跑批器 + 判定器、被动轨周报（多项目）。smoke 12 runs：**C0 激活归零（证实工具描述不能独立承担激活）、C1 显式 2/2、误触发 0**；单价 ≈$0.32/run。方案见 [docs/EXPERIMENT_C_PLAN.md](docs/EXPERIMENT_C_PLAN.md)。
+- ✅ 双宿主接入验证：Claude Code（user 级全局）与 Kimi Code 端到端链路均通过；新人配置向导 `poc/scripts/setup.mjs`。
+- ⏸ 全量跑批（~102 runs ≈$33）暂缓：转被动轨两周真实使用，周报驱动后续决策（详见台账）。
+- ⬜ 实验 D 正式 A/B（D-mini 实测基线）、BENCHMARK.md（全量后）。
+- 未动工：正式版 Core、SQLite 共享索引与并发拓扑验证、发布层（npm 包 / 宿主插件）。
