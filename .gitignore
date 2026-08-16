@@ -11,3 +11,4 @@ poc/dist/
 # logs & os
 *.log
 .DS_Store
+poc/experiments/c/results/

@@ -143,7 +143,25 @@ P0 已完成（claude-code 执行器实现，三批全验收，`b8c3163` 合入 
 
 判据（PLUGIN_SPEC 16.4）：显式触发率=100%、专业任务≥95%、简单任务误触发≤5%、命中后 `skill_read` 完成率=100%。C0 为对照臂不设通过线。
 
-待办（P1）：跑批器 + 判定脚本（`claude -p --output-format stream-json`，一次性 worktree）、smoke 12 runs 实测单价、全量 ~100 runs、被动轨首份周报。
+### P1 设施 + smoke 12 runs（2026-08-16）
+
+设施合入 main（`baf3f8d`）：`run-batch.mjs`（一次性 worktree 驱动 `claude -p`，stdin 喂任务）+ `arms/c0|c1.json` + `analyze.mjs`（16.3/16.4 判定聚合；有效性按轨迹 `result.subtype`——`max_turns` 属有效，因测量窗口只在轨迹前段）。原始轨迹在 `results/`（gitignore，不入库）。
+
+**smoke 结果（6 任务 × 2 臂 × 1 次，opus-4.8，12/12 有效）**：
+
+| 指标 | C0（无文案） | C1（instructions 文案） |
+|---|---|---|
+| 显式触发率 | **0/2**（连 $名字 都不搜） | **2/2** |
+| 隐式触发率 | 0/2 | 1/2（translator ✓；safe-update ✗） |
+| 隐式 Top-5 / read 完成 | n/a | 1/1 / 2/2 |
+| 负例误触发 | 0/2 ✅ | 0/2 ✅ |
+
+- **C0 归零证实 spec §7.4 预判：工具描述不能独立承担激活**——没有文案时模型完全无视技能库（连显式点名都不搜）。C1 的激活增量就是文案的净贡献。
+- not_found 例（C1）：搜索触发 ✓、结果空，但模型未报 skill_not_found 而是径直自己干（4 轮被切断）——触发合格、如实报告未达（n=1，全量时复核；或考虑显式类窗口 +1 轮）。
+- 隐式 safe-update 未触发（n=1）——全量 3 重复后再判断是否属系统性、是否需要文案迭代。
+- **成本实测：12 runs 共 $3.81，均值 ≈$0.32/run；全量 102 runs 预估 ≈$33**。单 run 上下文 ~10–13 万 token（dsh-buddy 真实环境）。
+
+待办：全量 ~102 runs（等预算拍板）、被动轨首份周报、BENCHMARK.md（全量后）。
 
 ---
 
