@@ -178,6 +178,13 @@ P0 已完成（claude-code 执行器实现，三批全验收，`b8c3163` 合入 
 - [ ] Kimi 是否注入 MCP `instructions` 未验——本次是显式任务，无法区分它处于 C1 还是 C0 形态；需 Kimi 侧隐式任务或上下文检查来判定（影响 Kimi 被动数据的归类）。
 - [ ] Kimi 会话轨迹在 `~/.kimi-code/sessions/`，格式与 Claude Code 转录不同，周报脚本暂不解析（Kimi 侧使用数据当前只能人工回顾）。
 
+### exec-flow 迁移：首个工作流技能全量走按需加载（2026-08-16）
+
+发现双源漂移（宿主 `~/.claude/skills/exec-flow` 8/16 版 vs 库内 8/15 旧快照，缺 qwen/claude-code 执行器文档）。用户决策：**唯一真源 = opc-skills，经 askill 使用**。已同步最新版入库（opc-skills `226adab`）并删除宿主副本——`~/.claude/skills/` 个人技能清零，收窄版"零宿主注入"在本机达成。后续会话使用 exec-flow 的路径：`skill_search` → `skill_read`（入口 + executors/<name>.md 子资源）。
+
+- 影响：`/exec-flow` 斜杠调用不再可用；已开会话的 MCP server 持旧索引，重开会话生效。
+- 任务集注记：v1 曾因"宿主自带"把 exec-flow 列为禁区；该理由已消失，任务集 v2 可将其纳入隐式用例。
+
 ---
 
 ## 实验 D — Token 降本（Q4）— ⬜ 待执行
