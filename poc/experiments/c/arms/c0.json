@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "askill": {
+      "command": "node",
+      "args": ["/Users/aiware/projects/askill-search/poc/dist/server.js"],
+      "env": {
+        "ASKILL_LIBRARY": "/Users/aiware/projects/opc-skills"
+      }
+    }
+  }
+}
