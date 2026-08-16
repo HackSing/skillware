@@ -109,11 +109,19 @@ claude mcp add askill-search-poc -- node /Users/aiware/projects/askill-search/po
 
 ---
 
-## 实验 C — 激活有效性（Q3）— ⬜ 待执行
+## 实验 C — 激活有效性（Q3）— 🟡 P0 设施就绪（2026-08-16）
 
-三类任务各 ≥5 次，对比「仅工具描述」vs「加 ≤500 字符宿主级激活规则」。
+方案见 [../docs/EXPERIMENT_C_PLAN.md](../docs/EXPERIMENT_C_PLAN.md)（实验田 = Claude Code 中开发 dsh-buddy 的真实会话；C0 仅工具描述 vs C1 MCP instructions 激活文案；主动轨跑批 ~100 runs + 被动轨真实会话周报，Opus 4.8，token 记账并入实验 D）。
 
-判据（PLUGIN_SPEC 16.4）：显式触发率=100%、专业任务≥95%、简单任务误触发≤5%、命中后 `skill_read` 完成率=100%。
+P0 已完成（claude-code 执行器实现，三批全验收，`b8c3163` 合入 main）：
+
+- **C0/C1 开关**：`ASKILL_ACTIVATION=1` 时 MCP initialize 注入激活文案（`src/activation.ts` 单一来源，≈190 可见字符）；`scripts/smoke-instructions` 双态验证通过。
+- **被动轨周报**：`experiments/passive/report.mjs` 扫转录统计触发链 + 四类 token + 全量注入估算（真实库 58 条目 ≈3966 token/请求，估算口径已标注）。
+- **固定任务集 v1**：`experiments/c/tasks.json` 30 条（显式 6 / 隐式 12 / 负例 12），`validate-tasks.mjs` 校验通过，用户已确认题目（2026-08-16）。
+
+判据（PLUGIN_SPEC 16.4）：显式触发率=100%、专业任务≥95%、简单任务误触发≤5%、命中后 `skill_read` 完成率=100%。C0 为对照臂不设通过线。
+
+待办（P1）：跑批器 + 判定脚本（`claude -p --output-format stream-json`，一次性 worktree）、smoke 12 runs 实测单价、全量 ~100 runs、被动轨首份周报。
 
 ---
 
