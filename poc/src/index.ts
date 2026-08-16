@@ -40,6 +40,21 @@ function parseList(inline: string, lines: string[], idx: number): string[] {
   return items;
 }
 
+// 标量值：支持 YAML 块标量（> 折叠 / | 字面，含 - + 修饰）。真实库的 description 多用 "description: >"，
+// 此前按行内值解析会得到字面 ">"，导致这类技能的描述完全未进索引（A-2 发现的缺陷）。
+function parseScalar(inline: string, lines: string[], idx: number): string {
+  if (!/^[>|][+-]?$/.test(inline)) return unquote(inline);
+  const body: string[] = [];
+  for (let j = idx + 1; j < lines.length; j++) {
+    const line = lines[j];
+    if (line.trim() === "") continue;
+    if (!/^\s/.test(line)) break; // 回到零缩进 = 下一个 key，块结束
+    body.push(line.trim());
+  }
+  // 折叠（>）与字面（|）在"单行摘要"用途下等价处理：合并为一行。
+  return body.join(" ");
+}
+
 // 极简 frontmatter 解析：只取 name / description / keywords。夹具格式可控，MVP 不引入 YAML 依赖。
 function parseFrontmatter(text: string): {
   name?: string;
@@ -56,7 +71,7 @@ function parseFrontmatter(text: string): {
     const key = kv[1].toLowerCase();
     const val = kv[2].trim();
     if (key === "name") out.name = unquote(val);
-    else if (key === "description") out.description = unquote(val);
+    else if (key === "description") out.description = parseScalar(val, lines, i);
     // keywords 与 triggers 都是人工标注的触发词，合并利用（真实技能多用 triggers）
     else if (key === "keywords" || key === "triggers") {
       out.keywords = (out.keywords ?? []).concat(parseList(val, lines, i));
@@ -73,7 +88,8 @@ function walk(dir: string, acc: string[]): void {
     return; // 缺失/无权限目录跳过，不阻断其他目录
   }
   for (const e of entries) {
-    if (e.name === "node_modules" || e.name === ".git") continue;
+    // 点目录（.backups/.git 等）与 node_modules 一律不进索引；EXCLUDE_DIRS 提供额外的按名排除。
+    if (e.name.startsWith(".") || e.name === "node_modules" || EXCLUDE_DIRS.has(e.name)) continue;
     const full = path.join(dir, e.name);
     if (e.isDirectory()) walk(full, acc);
     else if (e.isFile() && e.name === "SKILL.md") acc.push(full);

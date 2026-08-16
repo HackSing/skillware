@@ -52,6 +52,7 @@ cd poc && npm run build \
 
 **新发现**：
 - 🐛 **frontmatter 块标量解析缺陷**：`description: >`（YAML 折叠块，translator/snail 等技能在用）被索引成字面 `">"` ——这类技能的 description 完全没进索引，搜索结果 `short_description` 也显示 `">"`。显式/name 匹配不受影响，但**隐式检索会系统性吃亏，P1 跑批前必须修**，否则实验 C 的隐式触发率会被这个 bug 拉低而误归因为激活问题。
+  → ✅ 已修复（2026-08-16，同批还发现并修复点目录排除未真正落地的问题，见"真实库勘察"节更正）：`parseScalar` 支持 `>`/`|` 块标量；复测 translator/snail/design-taste-frontend 描述均为真文本，索引 58 条，smoke 回归通过。**已重新 build，用户重开会话即生效。**
 - 宿主环境事实：该环境下 MCP 工具经**延迟加载**（ToolSearch）暴露，工具 schema 不直接全量进首轮——C1 的 instructions 注入因此更关键（它始终在系统提示里）。
 - 本次 `-p` 验证会话写进了 dsh-buddy 转录目录（2026-08-16，含 translator 显式任务），被动轨周报人工回顾时应剔除。
 
@@ -113,6 +114,7 @@ cd /Users/aiware/projects/dsh-buddy && claude mcp add askill \
 1. 索引 `triggers` 字段（人工触发词）。
 2. **中文 2-gram (bigram) 匹配**——解决"中文无空格分词导致子串匹配失效"这一根因。
 3. 排除 `.backups` 等点目录（索引 368 → 58）。
+   > ⚠️ 更正（2026-08-16）：本条当时**记录先行、未真正落入代码**——A-2 验收后实测线上索引仍为 368（含 308 条 .backups）。已随块标量修复一并真正实现（点目录 + EXCLUDE_DIRS 双重排除），复测 58 条、.backups 为 0、重名为空。教训：验收记录必须以当次可复现命令的输出为准。
 
 **结论**：收窄版的两大技术风险初步排除——① 索引兼容性（100%）；② 中文检索质量（规则+bigram 即可，MVP 无需 embedding）。
 
@@ -123,7 +125,7 @@ cd /Users/aiware/projects/dsh-buddy && claude mcp add askill \
 
 ### 待办
 
-- [ ] `xueqiu-blogger-archive` 在结果中出现两条同分，`find` 仅见一个入口且 name 无重复 → 来源待查（疑似嵌套 `SKILL.md`）。
+- [x] `xueqiu-blogger-archive` 两条同分 → 已定位并解决（2026-08-16）：根因即 `.backups` 重复进索引；点目录排除真正落地后 duplicate names 为空。
 - [ ] `include`/`exclude` 配置化（真实库混入 docs/outputs 等，当前靠点目录排除 + `ASKILL_EXCLUDE_DIRS`）。
 - [ ] 扩到 ≥50 条固定基准集，含未见过的自然表达，重测 Top-1/Top-5。
 
