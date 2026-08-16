@@ -47,4 +47,14 @@ assert.match(out, /把 README 新增章节翻译成英文/, "报告应含 search
 assert.match(out, /跳过的损坏行数：1/, "报告应报告 1 条损坏行");
 assert.match(out, /\*\*9800\*\*/, "报告 token 合计应含 input 总计 9800");
 
-console.log("PASS: batch-2 被动轨周报 — 全部断言通过");
+// ---- 多目录模式：同一 fixtures 传两次，应出项目概览且合计翻倍 ----
+const out2 = execFileSync(
+  "node",
+  [reportPath, "--dir", fixturesDir, "--dir", fixturesDir, "--since", "2000-01-01"],
+  { encoding: "utf8" }
+);
+assert.match(out2, /项目概览/, "多目录模式应输出项目概览");
+assert.match(out2, /触发清单（全部项目）/, "多目录模式应输出合并触发清单");
+assert.match(out2, /\*\*19600\*\*/, "多项目 input 合计应为 19600（9800×2）");
+
+console.log("PASS: batch-2 被动轨周报 — 全部断言通过（含多目录模式）");

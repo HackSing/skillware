@@ -4,7 +4,9 @@
 // 扫描 Claude Code 会话转录（*.jsonl），统计 skill_search / skill_read 触发情况
 // 与四类 token 用量，附全量注入成本估算，输出 markdown 周报到 stdout。
 //
-// CLI：node report.mjs [--dir <转录目录>] [--since <YYYY-MM-DD>] [--library <技能库路径>]
+// CLI：node report.mjs [--dir <转录目录>]... [--all-projects] [--since <YYYY-MM-DD>] [--library <技能库路径>]
+//   --dir 可重复出现（多项目分别统计 + 合计）；--all-projects 自动扫描 ~/.claude/projects 下
+//   所有含 *.jsonl 的项目目录。两者都省略时默认 dsh-buddy 单项目。
 //
 // 为何未复用 poc/dist 的编译产物做技能库扫描：dist/config.js 在模块加载时一次性把
 // LIBRARY_ROOT 绑定到 ASKILL_LIBRARY 环境变量，无法干净地按本脚本的 --library 参数取库；
@@ -26,7 +28,9 @@ export function parseArgs(argv) {
   const HOME = os.homedir();
   const expand = (p) => (p.startsWith("~") ? path.join(HOME, p.slice(1)) : p);
 
-  let dir = path.join(HOME, ".claude/projects/-Users-aiware-projects-dsh-buddy");
+  const DEFAULT_DIR = path.join(HOME, ".claude/projects/-Users-aiware-projects-dsh-buddy");
+  const dirs = [];
+  let allProjects = false;
   let library = "/Users/aiware/projects/opc-skills";
 
   const d = new Date();
@@ -35,13 +39,47 @@ export function parseArgs(argv) {
 
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--dir") dir = expand(argv[++i] ?? dir);
+    if (a === "--dir") {
+      const v = argv[++i];
+      if (v) dirs.push(expand(v));
+    } else if (a === "--all-projects") allProjects = true;
     else if (a === "--since") since = argv[++i] ?? since;
     else if (a === "--library") library = expand(argv[++i] ?? library);
   }
 
   const parsed = Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(since) ? since + "T00:00:00.000Z" : since);
-  return { dir, since, sinceMs: Number.isNaN(parsed) ? -Infinity : parsed, library };
+  return {
+    dirs: dirs.length > 0 ? dirs : [DEFAULT_DIR],
+    allProjects,
+    since,
+    sinceMs: Number.isNaN(parsed) ? -Infinity : parsed,
+    library,
+  };
+}
+
+// --all-projects：~/.claude/projects 下所有含 *.jsonl 的项目目录（稳定排序）。
+export function resolveDirs(opts) {
+  if (!opts.allProjects) return opts.dirs;
+  const root = path.join(os.homedir(), ".claude/projects");
+  let entries = [];
+  try {
+    entries = fs.readdirSync(root, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const out = [];
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    const p = path.join(root, e.name);
+    let has = false;
+    try {
+      has = fs.readdirSync(p).some((f) => f.endsWith(".jsonl"));
+    } catch {
+      // 不可读目录跳过
+    }
+    if (has) out.push(p);
+  }
+  return out.sort();
 }
 
 // ---------------------------------------------------------------------------
@@ -361,26 +399,93 @@ export function renderReport(stats, lib, opts, nowIso) {
   );
   out.push("");
 
-  // 全量注入估算
-  const hypo = lib.estTokens * stats.assistantRequests;
-  out.push("## 全量注入估算（估算，非实测）");
+  out.push(...renderEstimateSection(lib, stats.assistantRequests));
+
+  return out.join("\n");
+}
+
+// 全量注入估算段（单/多项目共用；assistantRequests 为本期合计请求数）。
+function renderEstimateSection(lib, assistantRequests) {
+  const hypo = lib.estTokens * assistantRequests;
+  return [
+    "## 全量注入估算（估算，非实测）",
+    "",
+    `- 技能库：\`${lib.libraryPath}\`（只读扫描 \`SKILL.md\`，排除点目录与 \`node_modules\`）`,
+    `- 目录条目数：${lib.skillCount}`,
+    `- 渲染目录（\`- name: description\`）可见字符数：${lib.visibleChars}`,
+    `- 估算 token：${lib.estTokens}（启发式：CJK 字符每字≈1 token，其余≈4 字符/token；此为**估算**，非实测）`,
+    `- 若该目录每请求常驻：本期会话合计假想成本 ≈ 估算 token × 本期 assistant 请求数 = ${lib.estTokens} × ${assistantRequests} = **${hypo}** token`,
+    "- 局限：此为估算而非实测；skill_search / skill_read 的实际结果 token 无法从转录的 `usage` 中单独拆出，故未从上表 token 中扣除。",
+    "",
+  ];
+}
+
+// 多项目报告：项目概览 + 全部触发清单 + 按项目 token + 合计 + 一次估算段。
+export function renderMultiReport(scans, lib, opts, nowIso) {
+  const out = [];
+  out.push("# 被动轨周报（多项目）：skill_search / skill_read 触发与 token 记账");
   out.push("");
+  out.push(`> 生成时间：${nowIso}  ·  时间窗：timestamp ≥ ${opts.since}  ·  项目数：${scans.length}`);
+  out.push("> 口径见 docs/EXPERIMENT_C_PLAN.md §6（被动轨）、§7（Token 记账）。");
+  out.push("");
+
+  const g = {
+    sessions: 0, withSearch: 0, search: 0, read: 0, req: 0, corrupt: 0,
+    tokens: { input: 0, cacheCreation: 0, cacheRead: 0, output: 0 },
+  };
+
+  out.push("## 项目概览");
+  out.push("");
+  out.push("| 项目 | 会话数 | 含 search 会话 | search | read | assistant 请求 | 损坏行 |");
+  out.push("|---|---:|---:|---:|---:|---:|---:|");
+  for (const s of scans) {
+    const st = s.stats;
+    out.push(
+      `| ${mdEscape(path.basename(s.dir))} | ${st.sessionCount} | ${st.sessionsWithSearch} | ${st.searchCount} | ${st.readCount} | ${st.assistantRequests} | ${st.corruptLines} |`
+    );
+    g.sessions += st.sessionCount; g.withSearch += st.sessionsWithSearch;
+    g.search += st.searchCount; g.read += st.readCount;
+    g.req += st.assistantRequests; g.corrupt += st.corruptLines;
+    g.tokens.input += st.totals.input; g.tokens.cacheCreation += st.totals.cacheCreation;
+    g.tokens.cacheRead += st.totals.cacheRead; g.tokens.output += st.totals.output;
+  }
   out.push(
-    `- 技能库：\`${lib.libraryPath}\`（只读扫描 \`SKILL.md\`，排除点目录与 \`node_modules\`）`
-  );
-  out.push(`- 目录条目数：${lib.skillCount}`);
-  out.push(`- 渲染目录（\`- name: description\`）可见字符数：${lib.visibleChars}`);
-  out.push(
-    `- 估算 token：${lib.estTokens}（启发式：CJK 字符每字≈1 token，其余≈4 字符/token；此为**估算**，非实测）`
-  );
-  out.push(
-    `- 若该目录每请求常驻：本期会话合计假想成本 ≈ 估算 token × 本期 assistant 请求数 = ${lib.estTokens} × ${stats.assistantRequests} = **${hypo}** token`
-  );
-  out.push(
-    "- 局限：此为估算而非实测；skill_search / skill_read 的实际结果 token 无法从转录的 `usage` 中单独拆出，故未从上表 token 中扣除。"
+    `| **合计** | **${g.sessions}** | **${g.withSearch}** | **${g.search}** | **${g.read}** | **${g.req}** | **${g.corrupt}** |`
   );
   out.push("");
 
+  out.push("## 触发清单（全部项目）");
+  out.push("");
+  if (!scans.some((s) => s.stats.triggers.length > 0)) {
+    out.push("_本期无 skill 工具触发。_");
+  } else {
+    out.push("| 项目 | 会话 | 时间 | 工具 | query / 目标 | search→read |");
+    out.push("|---|---|---|---|---|---|");
+    for (const s of scans) {
+      for (const t of s.stats.triggers) {
+        const pair = t.tool === "skill_search" ? (t.followedByRead ? "✅ 是" : "❌ 否") : "—";
+        out.push(
+          `| ${mdEscape(path.basename(s.dir))} | ${mdEscape(t.file)} | ${mdEscape(t.timestamp)} | ${t.tool} | ${mdEscape(t.target)} | ${pair} |`
+        );
+      }
+    }
+  }
+  out.push("");
+
+  out.push("## Token 记账（按项目）");
+  out.push("");
+  out.push("| 项目 | input | cache_creation | cache_read | output |");
+  out.push("|---|---:|---:|---:|---:|");
+  for (const s of scans) {
+    const t = s.stats.totals;
+    out.push(`| ${mdEscape(path.basename(s.dir))} | ${t.input} | ${t.cacheCreation} | ${t.cacheRead} | ${t.output} |`);
+  }
+  out.push(
+    `| **合计** | **${g.tokens.input}** | **${g.tokens.cacheCreation}** | **${g.tokens.cacheRead}** | **${g.tokens.output}** |`
+  );
+  out.push("");
+
+  out.push(...renderEstimateSection(lib, g.req));
   return out.join("\n");
 }
 
@@ -389,10 +494,17 @@ export function renderReport(stats, lib, opts, nowIso) {
 // ---------------------------------------------------------------------------
 function main() {
   const opts = parseArgs(process.argv.slice(2));
-  const stats = scanTranscripts(opts.dir, opts.sinceMs);
+  const dirs = resolveDirs(opts);
   const lib = estimateLibrary(opts.library);
   const nowIso = new Date().toISOString();
-  process.stdout.write(renderReport(stats, lib, opts, nowIso) + "\n");
+  if (dirs.length <= 1) {
+    const dir = dirs[0] ?? opts.dirs[0];
+    const stats = scanTranscripts(dir, opts.sinceMs);
+    process.stdout.write(renderReport(stats, lib, { ...opts, dir }, nowIso) + "\n");
+  } else {
+    const scans = dirs.map((d) => ({ dir: d, stats: scanTranscripts(d, opts.sinceMs) }));
+    process.stdout.write(renderMultiReport(scans, lib, opts, nowIso) + "\n");
+  }
   process.exit(0);
 }
 
