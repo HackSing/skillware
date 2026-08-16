@@ -44,12 +44,17 @@ cd poc && npm run build \
 
 在 Claude Code 注册本 MCP，验证模型**免交互审批**调用两个只读工具。
 
-注册（用户在真实终端，先 build 出 `dist/`）：
+注册（用户在真实终端，先 build 出 `dist/`；在 dsh-buddy 目录注册 = 只对该项目生效，实验 C 的实验田）：
 
 ```bash
 cd /Users/aiware/projects/askill-search/poc && npm run build
-claude mcp add askill-search-poc -- node /Users/aiware/projects/askill-search/poc/dist/server.js
+cd /Users/aiware/projects/dsh-buddy && claude mcp add askill \
+  --env ASKILL_LIBRARY=/Users/aiware/projects/opc-skills \
+  --env ASKILL_ACTIVATION=1 \
+  -- node /Users/aiware/projects/askill-search/poc/dist/server.js
 ```
+
+`ASKILL_ACTIVATION=1` = C1 形态（注入激活文案）；去掉该行 = C0 对照形态。卸载：`claude mcp remove askill`。
 
 判据：新会话中 `skill_search` / `skill_read` 能被调用，只读元数据下不被宿主取消执行；若被审批阻断记 `activation_blocked`。
 
