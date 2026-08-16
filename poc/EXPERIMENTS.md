@@ -40,9 +40,24 @@ cd poc && npm run build \
 
 **结论**：协议层假设成立——两个只读工具能被 MCP 客户端稳定调用，搜索/读取逻辑正确，路径与 Package 边界有效。
 
-### A-2 宿主级（PLUGIN_SPEC 16.7 第 5 层「真实宿主层」）— ⬜ 待执行
+### A-2 宿主级（PLUGIN_SPEC 16.7 第 5 层「真实宿主层」）— ✅ 通过（2026-08-16）
 
-在 Claude Code 注册本 MCP，验证模型**免交互审批**调用两个只读工具。
+用户在真实终端完成注册（C1 形态）；`claude mcp list` 显示 `askill ✔ Connected`（与用户其余 MCP 共存）。宿主级调用验证：在 dsh-buddy 目录以 `claude -p`（opus-4.8，仅放行两个 skill 工具）发显式任务「用 translator 技能翻译 README 一句」，观察到完整链路：
+
+1. 模型经 ToolSearch 加载两个延迟工具 → `skill_search`（query "translator 文档翻译"）→ translator Top-1；
+2. `skill_read` 读入口拿到 `package_ref`；
+3. 按技能 quick 模式产出翻译。
+
+首轮上下文实测：cache_creation 22,684 + cache_read 123,550 tokens（dsh-buddy 真实环境很重，后续 D 记账的现实基线）。
+
+**新发现**：
+- 🐛 **frontmatter 块标量解析缺陷**：`description: >`（YAML 折叠块，translator/snail 等技能在用）被索引成字面 `">"` ——这类技能的 description 完全没进索引，搜索结果 `short_description` 也显示 `">"`。显式/name 匹配不受影响，但**隐式检索会系统性吃亏，P1 跑批前必须修**，否则实验 C 的隐式触发率会被这个 bug 拉低而误归因为激活问题。
+- 宿主环境事实：该环境下 MCP 工具经**延迟加载**（ToolSearch）暴露，工具 schema 不直接全量进首轮——C1 的 instructions 注入因此更关键（它始终在系统提示里）。
+- 本次 `-p` 验证会话写进了 dsh-buddy 转录目录（2026-08-16，含 translator 显式任务），被动轨周报人工回顾时应剔除。
+
+判据补充说明：交互式会话的免审批体验未单独验证，将由被动轨第一周真实使用自然覆盖；若出现审批阻断按 `activation_blocked` 记录。
+
+原注册命令（备查）：
 
 注册（用户在真实终端，先 build 出 `dist/`；在 dsh-buddy 目录注册 = 只对该项目生效，实验 C 的实验田）：
 
