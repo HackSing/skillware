@@ -10,6 +10,10 @@ export const LIBRARY_ROOT = process.env.ASKILL_LIBRARY
   : path.resolve(__dirname, "../fixtures");
 
 export const LIBRARY_ID = "poc";
+
+// 实验 C 的 C0/C1 开关：为 1 时在 MCP initialize 结果里注入激活规则（instructions 字段），否则行为同现状。
+export const ACTIVATION_ENABLED = process.env.ASKILL_ACTIVATION === "1";
+
 export const SEARCH_DEFAULT_LIMIT = 5;
 export const SEARCH_MAX_LIMIT = 10;
 

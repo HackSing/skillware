@@ -8,13 +8,22 @@ import {
 import { buildIndex } from "./index.js";
 import { searchSkills } from "./search.js";
 import { readEntry, readByPackageRef } from "./read.js";
-import { SEARCH_DEFAULT_LIMIT, SEARCH_MAX_LIMIT } from "./config.js";
+import {
+  SEARCH_DEFAULT_LIMIT,
+  SEARCH_MAX_LIMIT,
+  ACTIVATION_ENABLED,
+} from "./config.js";
+import { ACTIVATION_POLICY } from "./activation.js";
 
 const index = buildIndex();
 
 const server = new Server(
   { name: "askill-search-poc", version: "0.0.0" },
-  { capabilities: { tools: {} } }
+  {
+    capabilities: { tools: {} },
+    // 实验 C：C1 开关开时把激活规则挂到 initialize 的 instructions 字段；关时不传该字段（行为同现状）。
+    ...(ACTIVATION_ENABLED ? { instructions: ACTIVATION_POLICY } : {}),
+  }
 );
 
 // 两个只读工具。annotations 向支持的宿主声明只读、非破坏、非开放网络。
