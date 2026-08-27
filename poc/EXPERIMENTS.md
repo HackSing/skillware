@@ -187,6 +187,20 @@ P0 已完成（claude-code 执行器实现，三批全验收，`b8c3163` 合入 
 
 ---
 
+## 多宿主：Windows 机三宿主接入（2026-08-25）
+
+第二台机器（Windows 11）首次部署，技能库 = `D:\Project\opc-skills`（索引 57 个技能），server = `D:\Project\askill-search\poc\dist\server.js`（本机 `npm install && npm run build` 产出），环境变量同 Mac 端（`ASKILL_LIBRARY` + `ASKILL_ACTIVATION=1`，即 C1 形态）。协议级冒烟通过：initialize 注入激活文案，`skill_search "翻译"` 命中 translator。
+
+- **Claude Code**：`claude mcp add askill --scope user`（user 级，同 Mac 先例），`claude mcp get askill` 显示 Connected ✅。
+- **Codex CLI**（本项目**第三个宿主**，首次接入）：`~/.codex/config.toml` 增加 `[mcp_servers.askill]`（备份 `config.toml.bak-20260825`），`codex mcp list` 已识别、enabled；端到端（会话内 `skill_search`→`skill_read`）未验。
+- **Kimi CLI**：`~/.kimi-code/mcp.json` 增加 `askill` 条目（备份 `mcp.json.bak-20260825`），格式同 Mac 端；端到端未验。
+
+待办：
+- [ ] Codex / Kimi 各跑一次显式任务验证端到端（Codex 属新宿主，是 16.7 多宿主层第三个证据点）。
+- [ ] Codex 是否注入 MCP `instructions`（激活文案）未验——同 Kimi 开放问题。
+
+---
+
 ## 实验 D — Token 降本（Q4）— ⬜ 待执行
 
 同宿主/模型/项目/任务集下 A/B：原全量注入 vs 关闭注入+两工具+激活规则，测真实首轮 input tokens。
