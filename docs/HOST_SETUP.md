@@ -2,7 +2,7 @@
 
 > 一句话架构：**技能库一份（你自己的）、MCP server 一份、宿主配置每家一条。**
 > skillware 不自带技能，也不要求技能放在任何宿主的默认目录——你指定一个本地目录作为技能库，它负责按需搜索与读取。
-> 已验证宿主：Claude Code、Kimi Code。
+> 已验证宿主：Claude Code、Kimi Code、Codex CLI。
 
 ## 技能库格式要求
 
@@ -72,6 +72,23 @@ claude mcp add skillware --scope user \
 - `transport` 字段是 Kimi 要求的；VS 插件需重启窗口生效。
 - Kimi 自带的 `~/.kimi-code/skills/` 全量注入目录**刻意不用**——本项目的意义就是替代全量注入。
 - 回滚：删掉该条目。
+
+### Codex CLI
+
+编辑 `~/.codex/config.toml`（改前备份），加：
+
+```toml
+[mcp_servers.skillware]
+command = "node"
+args = ["<skillware>/poc/dist/server.js"]
+
+[mcp_servers.skillware.env]
+SKILLWARE_LIBRARY = "<library>"
+SKILLWARE_ACTIVATION = "1"
+```
+
+- 验证：`codex mcp list` 应显示 `skillware ... enabled`。
+- 回滚：删掉这两段。
 
 ### 其他宿主（通用判定三问）
 
