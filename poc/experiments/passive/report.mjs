@@ -9,7 +9,7 @@
 //   所有含 *.jsonl 的项目目录。两者都省略时默认 dsh-buddy 单项目。
 //
 // 为何未复用 poc/dist 的编译产物做技能库扫描：dist/config.js 在模块加载时一次性把
-// LIBRARY_ROOT 绑定到 ASKILL_LIBRARY 环境变量，无法干净地按本脚本的 --library 参数取库；
+// LIBRARY_ROOT 绑定到 SKILLWARE_LIBRARY 环境变量，无法干净地按本脚本的 --library 参数取库；
 // 且其排除集只含 node_modules/.git，与本报告要求的“排除全部点目录 + node_modules”口径不同。
 // 故此处按 poc/src/index.ts 的扫描思路独立实现一份最小版本（仅取 name/description）。
 
@@ -18,7 +18,7 @@ import path from "node:path";
 import os from "node:os";
 import { fileURLToPath } from "node:url";
 
-// MCP 前缀（mcp__askill__skill_search）与裸名（skill_read）都要匹配。
+// MCP 前缀（mcp__skillware__skill_search）与裸名（skill_read）都要匹配。
 const SKILL_TOOL_RE = /(^|__)skill_(search|read)$/;
 
 // ---------------------------------------------------------------------------

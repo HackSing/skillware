@@ -1,12 +1,12 @@
-# askill-search 插件产品与技术方案
+# skillware 插件产品与技术方案
 
 > 文档状态：待实现  
-> 独立项目：`/Users/aiware/projects/askill-search`  
+> 独立项目：`/Users/aiware/projects/skillware`  
 > 方案日期：2026-08-09
 
 ## 1. 一句话目的
 
-askill-search 通过“按任务搜索、按需加载”替代 AI Agent 宿主对全量 Skills 的首轮注入，在不牺牲技能可用性的前提下，显著降低不同 Agent 产品和项目的 Token 消耗。
+skillware 通过“按任务搜索、按需加载”替代 AI Agent 宿主对全量 Skills 的首轮注入，在不牺牲技能可用性的前提下，显著降低不同 Agent 产品和项目的 Token 消耗。
 
 ## 2. 背景
 
@@ -27,11 +27,11 @@ askill-search 通过“按任务搜索、按需加载”替代 AI Agent 宿主�
 | ZBuddy CLI 默认可见提示 | 33,034 个可见字符 |
 | 使用精简测试 Profile 后 | 25,002 个可见字符 |
 
-另外，当前本机 Codex CLI 0.147.0 中名为 `skill_search` 的 feature flag，并没有暴露本方案所需的模型工具，也没有减少 Skills 目录注入。因此，Codex 适配器不能把该 feature flag 当作已经存在的按需检索能力。这是首个宿主的实测限制，不应被写成 askill-search 的通用产品限制。
+另外，当前本机 Codex CLI 0.147.0 中名为 `skill_search` 的 feature flag，并没有暴露本方案所需的模型工具，也没有减少 Skills 目录注入。因此，Codex 适配器不能把该 feature flag 当作已经存在的按需检索能力。这是首个宿主的实测限制，不应被写成 skillware 的通用产品限制。
 
 ## 3. 产品定位
 
-askill-search 是一个**跨 Agent 宿主的全局基础能力插件**，不属于 ZBuddy、Codex 或任何具体业务项目，也不应该包含它们的业务逻辑。
+skillware 是一个**跨 Agent 宿主的全局基础能力插件**，不属于 ZBuddy、Codex 或任何具体业务项目，也不应该包含它们的业务逻辑。
 
 它解决的是 AI Agent 宿主的技能发现和上下文装载问题。这里的 Skill 不是单个 `SKILL.md` 文件，而是以 `SKILL.md` 为入口、包含其同目录下引用资源的 **Skill Package**：
 
@@ -67,7 +67,7 @@ skill_read 读取该 Skill Package 的 SKILL.md
 
 ### 3.2 成功定义
 
-askill-search 成功不等于 MCP 工具能够启动，而是同时满足：
+skillware 成功不等于 MCP 工具能够启动，而是同时满足：
 
 - 用户配置的技能目录能够被正确索引和搜索，已选 Skill Package 的入口与必要引用资源能够被按需读取。
 - 真实 Agent 宿主首轮不再注入该 Skill Library 的全量目录。
@@ -100,7 +100,7 @@ askill-search 成功不等于 MCP 工具能够启动，而是同时满足：
 
 #### FR-1：全局生效
 
-askill-search 在某个宿主中全局安装并启用后，应服务于该宿主的所有项目，而不是根据某个项目路径绑定。不同宿主分别通过 Host Adapter 完成全局集成。
+skillware 在某个宿主中全局安装并启用后，应服务于该宿主的所有项目，而不是根据某个项目路径绑定。不同宿主分别通过 Host Adapter 完成全局集成。
 
 #### FR-2：关闭全量 Skill 目录注入
 
@@ -146,7 +146,7 @@ Skill Package 的默认边界是入口 `SKILL.md` 所在目录；如果其后代
 
 #### FR-8：可诊断、可回滚
 
-用户能够查看当前配置的技能库、索引数量、异常文件和最后刷新时间。关闭 askill-search 或恢复宿主原始 Skill 注入时，不得丢失或修改用户技能文件。
+用户能够查看当前配置的技能库、索引数量、异常文件和最后刷新时间。关闭 skillware 或恢复宿主原始 Skill 注入时，不得丢失或修改用户技能文件。
 
 #### FR-9：跨宿主扩展
 
@@ -179,7 +179,7 @@ Host Adapter 必须为目标宿主安装一段版本化的最小 Activation Poli
 
 - 不负责执行 Skill 中描述的任务。
 - 不修改 Skill 正文，不提供 Skill 编辑器。
-- 不由 askill-search 直接执行 Skill Package 内的脚本；需要执行脚本时，由 Host Adapter 声明宿主是否具备访问所选 Package 和安全执行本地文件的能力。
+- 不由 skillware 直接执行 Skill Package 内的脚本；需要执行脚本时，由 Host Adapter 声明宿主是否具备访问所选 Package 和安全执行本地文件的能力。
 - 不把所有 Skill 正文预先合并成一个超级 Router Skill。
 - MVP 不依赖云端向量数据库或远程 Embedding 服务。
 - 不把 ZBuddy、Docs Harness、Codex 专属行为或其他业务项目规则写进 Core。
@@ -189,7 +189,7 @@ Host Adapter 必须为目标宿主安装一段版本化的最小 Activation Poli
 ## 7. 总体架构
 
 ```text
-askill-search
+skillware
 ├── Core
 │   └── 配置、技能库、索引、排序与安全边界
 ├── MCP Server
@@ -281,12 +281,12 @@ Host Adapter 按“宿主原生插件 developer/system instruction → 经实测
 
 ### 8.1 建议配置位置
 
-askill-search 配置与各 Agent 宿主的主配置分离，避免升级或回滚时破坏用户现有配置：
+skillware 配置与各 Agent 宿主的主配置分离，避免升级或回滚时破坏用户现有配置：
 
 ```text
-macOS:   ~/Library/Application Support/askill-search/config.toml
-Linux:   ${XDG_CONFIG_HOME:-~/.config}/askill-search/config.toml
-Windows: %APPDATA%\askill-search\config.toml
+macOS:   ~/Library/Application Support/skillware/config.toml
+Linux:   ${XDG_CONFIG_HOME:-~/.config}/skillware/config.toml
+Windows: %APPDATA%\skillware\config.toml
 ```
 
 具体路径在实现阶段按跨平台规范和各宿主插件规范校准。
@@ -338,19 +338,19 @@ exclude = ["**/.git/**"]
 ### 8.4 建议 CLI
 
 ```bash
-askill-search library add \
+skillware library add \
   --id personal \
   --name "我的技能库" \
   --path /Users/example/my-skills \
   --priority 100
 
-askill-search library list
-askill-search library disable personal
-askill-search library enable personal
-askill-search library remove personal
-askill-search config validate
-askill-search index refresh
-askill-search index status
+skillware library list
+skillware library disable personal
+skillware library enable personal
+skillware library remove personal
+skillware config validate
+skillware index refresh
+skillware index status
 ```
 
 管理能力放在 CLI，而不是继续增加模型可见的 MCP 工具，避免增加常驻工具 Schema。
@@ -426,7 +426,7 @@ Codex Desktop ──┼→ 各自启动的 MCP 进程
 1. 每个 MCP 进程可以并发读取同一个已提交索引快照。
 2. MCP 启动和 `skill_search` 前执行带短 TTL 的 `ensureFresh()`；TTL 内直接读取现有快照，超过 TTL 才尝试低成本增量检查。
 3. 只有取得 `refresh.lock` 的进程可以扫描变化并写入索引。其他进程可以继续读取上一个完整快照，或在配置允许时短暂等待，不能自行并发刷新。
-4. `askill-search index refresh` 与 MCP 使用同一套刷新锁和事务，CLI 不得旁路写入数据库。
+4. `skillware index refresh` 与 MCP 使用同一套刷新锁和事务，CLI 不得旁路写入数据库。
 5. 数据库 Schema 迁移必须取得独立 `migration.lock`；迁移期间不允许旧版本进程继续写入。
 6. SQLite 使用 WAL 和短事务；`index_version` 只在一次完整刷新事务成功提交后递增。
 7. `package_ref` 绑定当前 MCP 会话和内容版本，不跨进程共享。
@@ -578,7 +578,7 @@ openWorldHint = false
 
 `skill_search` 可以声明 `idempotentHint = true`。`skill_read` 是否声明幂等取决于内容版本一致性合同；在相同 `expected_hash` 下返回相同内容后才可以声明。
 
-Host Adapter 应只对 askill-search 的两个已知工具配置宿主支持的自动允许模式，不能对该宿主的全部 MCP 工具进行宽泛授权。若模型决定调用但被宿主审批阻断，应报告 `activation_blocked`，不能误判为搜索召回失败。
+Host Adapter 应只对 skillware 的两个已知工具配置宿主支持的自动允许模式，不能对该宿主的全部 MCP 工具进行宽泛授权。若模型决定调用但被宿主审批阻断，应报告 `activation_blocked`，不能误判为搜索召回失败。
 
 ## 12. 宿主集成与迁移方案
 
@@ -606,7 +606,7 @@ plan_activation()      预览规则文本、安装位置、作用域和固定上
 apply_activation()     安装规则及两个工具的只读审批配置
 status_activation()    检查规则、工具和审批状态是否一致
 verify_activation()    运行显式、隐式专业任务和简单任务三类真实验证
-rollback_activation()  只撤销 askill-search 管理的激活内容
+rollback_activation()  只撤销 skillware 管理的激活内容
 ```
 
 安装必须按以下顺序执行，避免新旧机制切换时出现能力真空：
@@ -649,7 +649,7 @@ rollback_activation()  只撤销 askill-search 管理的激活内容
 
 1. **宿主原生全局开关**：如果目标宿主提供关闭 Skills 自动发现/注入的正式配置，优先使用。
 2. **逐项禁用配置**：如果只有单 Skill 的 `enabled=false`，由集成器枚举当前 Skill 并生成可预览的托管禁用项；插件升级或 Skill 路径变化后需要重新对账。
-3. **非自动发现目录**：用户个人 Skill 迁移或直接存放到自定义 Skill Library，不放在目标宿主的自动发现目录中。askill-search 只索引原位置。
+3. **非自动发现目录**：用户个人 Skill 迁移或直接存放到自定义 Skill Library，不放在目标宿主的自动发现目录中。skillware 只索引原位置。
 4. **宿主插件 Skill 处理**：其他已安装插件贡献的 Skills 也必须纳入禁用和对账，否则全量目录仍会重新出现。
 
 任何策略都必须满足：
@@ -664,10 +664,10 @@ rollback_activation()  只撤销 askill-search 管理的激活内容
 ### 12.4 建议集成命令
 
 ```bash
-askill-search host plan --host codex
-askill-search host apply --host codex --from-plan <plan-id>
-askill-search host status --host codex
-askill-search host rollback --host codex
+skillware host plan --host codex
+skillware host apply --host codex --from-plan <plan-id>
+skillware host status --host codex
+skillware host rollback --host codex
 ```
 
 `plan` 必须报告：
@@ -697,7 +697,7 @@ measure()   收集该宿主首轮上下文和 Token 指标
 
 通用 `detect/plan/apply/status/rollback` 必须组合本节的 Activation 能力，确保 MCP 注册、激活规则和原 Skills 注入切换属于同一个可预览、可验证、可回滚的宿主集成计划。
 
-如果宿主不支持插件，只要支持本地 MCP 或等价的结构化工具协议，并能提供稳定的全局模型可见 Activation 渠道，也可以通过 Adapter 安装 askill-search。若宿主不能注册外部工具、不能形成稳定激活或不能关闭原 Skills 注入，应明确标记对应能力为 `unsupported`，不能用项目文档提示词模拟全局完成。
+如果宿主不支持插件，只要支持本地 MCP 或等价的结构化工具协议，并能提供稳定的全局模型可见 Activation 渠道，也可以通过 Adapter 安装 skillware。若宿主不能注册外部工具、不能形成稳定激活或不能关闭原 Skills 注入，应明确标记对应能力为 `unsupported`，不能用项目文档提示词模拟全局完成。
 
 ### 12.6 Codex 首个适配器
 
@@ -869,7 +869,7 @@ CLI 成功不能替代 Desktop 成功；调试命令输出也不能替代真实�
 - [ ] 依赖二进制模板、本地素材或脚本的 Skill，只有在 Host Adapter 明确具备所选 Package 本地访问能力时才标记为完整支持。
 - [ ] 重名 Skill 能通过来源库和稳定 ID 区分。
 - [ ] 一个不可用技能库不会影响其他技能库。
-- [ ] 关闭 askill-search 后可以恢复该宿主原有 Skill 机制。
+- [ ] 关闭 skillware 后可以恢复该宿主原有 Skill 机制。
 
 ### 16.2 Token 验收
 
@@ -967,7 +967,7 @@ CLI 成功不能替代 Desktop 成功；调试命令输出也不能替代真实�
 实现阶段建议使用 TypeScript/Node.js，以便于 MCP、跨平台 CLI 和多宿主 Adapter 打包；如果阶段 0 证明目标宿主运行时有不同约束，再调整语言或为 Adapter 使用独立封装。
 
 ```text
-askill-search/
+skillware/
 ├── README.md
 ├── docs/
 │   ├── PLUGIN_SPEC.md

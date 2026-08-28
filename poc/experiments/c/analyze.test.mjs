@@ -158,7 +158,7 @@ close(t.cost_sum, 0.084, 'tokens.cost_sum');
 {
   const parsed = parseRun(
     [
-      JSON.stringify({ type: 'assistant', message: { content: [{ type: 'tool_use', id: 's', name: 'mcp__askill__skill_search', input: { query: '$foo' } }] } }),
+      JSON.stringify({ type: 'assistant', message: { content: [{ type: 'tool_use', id: 's', name: 'mcp__skillware__skill_search', input: { query: '$foo' } }] } }),
       JSON.stringify({ type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: 's', content: [{ type: 'text', text: JSON.stringify({ results: [] }) }] }] } }),
       JSON.stringify({ type: 'assistant', message: { content: [{ type: 'text', text: '我帮你手写了一份更新日志。' }] } }),
     ].join('\n'),

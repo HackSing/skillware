@@ -1,11 +1,11 @@
 {
-  "name": "askill-search-poc",
+  "name": "skillware-poc",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Phase-0 falsification skeleton for askill-search (MCP skill_search / skill_read).",
+  "description": "Phase-0 falsification skeleton for skillware (MCP skill_search / skill_read).",
   "bin": {
-    "askill-search-poc": "dist/server.js"
+    "skillware-poc": "dist/server.js"
   },
   "scripts": {
     "build": "tsc",

@@ -1,4 +1,4 @@
-{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_s1","name":"mcp__askill__skill_search","input":{"query":"resolveLauncher DSH_CMD 逃生通道"}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_s1","name":"mcp__skillware__skill_search","input":{"query":"resolveLauncher DSH_CMD 逃生通道"}}]}}
 {"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_s1","content":[{"type":"text","text":"{\"results\":[],\"index_version\":1,\"total_candidates\":0}"}]}]}}
 {"type":"assistant","message":{"content":[{"type":"text","text":"这段逻辑是这样的……"}]}}
 {"type":"result","usage":{"input_tokens":60,"cache_creation_input_tokens":0,"cache_read_input_tokens":300,"output_tokens":10},"total_cost_usd":0.005}

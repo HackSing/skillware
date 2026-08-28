@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// askill-search 新人配置向导：选择你自己的技能库 → 自动接入本机检测到的宿主。
+// skillware 新人配置向导：选择你自己的技能库 → 自动接入本机检测到的宿主。
 //
 // 交互模式（推荐）：  node scripts/setup.mjs
 // 非交互模式：        node scripts/setup.mjs --library <你的技能库路径> [--hosts claude,kimi] [--no-activation] [--dry-run]
@@ -20,7 +20,7 @@ const SERVER_JS = path.join(POC_ROOT, "dist", "server.js");
 const INDEX_JS = path.join(POC_ROOT, "dist", "index.js");
 const KIMI_HOME = path.join(os.homedir(), ".kimi-code");
 const KIMI_MCP = path.join(KIMI_HOME, "mcp.json");
-const MCP_NAME = "askill";
+const MCP_NAME = "skillware";
 
 const expand = (p) => (p && p.startsWith("~") ? path.join(os.homedir(), p.slice(1)) : p);
 
@@ -111,7 +111,7 @@ function scanLibrary(dir) {
     console.log(JSON.stringify({ total: idx.length, withDesc: ok }));
   }).catch(e => { console.error(String(e && e.message || e)); process.exit(1); });`;
   const r = spawnSync(process.execPath, ["--input-type=module", "-e", code], {
-    env: { ...process.env, ASKILL_LIBRARY: dir },
+    env: { ...process.env, SKILLWARE_LIBRARY: dir },
     encoding: "utf8",
   });
   if (r.status !== 0) return null;
@@ -170,8 +170,8 @@ async function askHosts(rl, detected) {
 
 // ---------- 步骤 4：写宿主配置 ----------
 function installClaude(library, activation, dryRun) {
-  const envArgs = ["--env", `ASKILL_LIBRARY=${library}`];
-  if (activation) envArgs.push("--env", "ASKILL_ACTIVATION=1");
+  const envArgs = ["--env", `SKILLWARE_LIBRARY=${library}`];
+  if (activation) envArgs.push("--env", "SKILLWARE_ACTIVATION=1");
   const addArgs = ["mcp", "add", MCP_NAME, "--scope", "user", ...envArgs, "--", "node", SERVER_JS];
   if (dryRun) {
     console.log(`  [dry-run] claude mcp remove ${MCP_NAME} --scope user（若存在）`);
@@ -203,7 +203,7 @@ function installKimi(library, activation, dryRun) {
     transport: "stdio",
     command: "node",
     args: [SERVER_JS],
-    env: { ASKILL_LIBRARY: library, ...(activation ? { ASKILL_ACTIVATION: "1" } : {}) },
+    env: { SKILLWARE_LIBRARY: library, ...(activation ? { SKILLWARE_ACTIVATION: "1" } : {}) },
   };
   if (dryRun) {
     console.log(`  [dry-run] 备份 ${KIMI_MCP} 并写入 mcpServers.${MCP_NAME} = ${JSON.stringify(entry)}`);
@@ -222,7 +222,7 @@ function installKimi(library, activation, dryRun) {
 // ---------- 主流程 ----------
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  console.log("askill-search 配置向导：把你自己的技能库接入本机的 Agent 宿主\n");
+  console.log("skillware 配置向导：把你自己的技能库接入本机的 Agent 宿主\n");
 
   ensureBuilt(args.dryRun);
 
@@ -270,8 +270,8 @@ async function main() {
   console.log(`\n完成${args.dryRun ? "（dry-run，未实际写入）" : ""}。验证方式：`);
   console.log("  · 重开一个新会话（已开着的会话不生效）；");
   console.log('  · 发一条点名技能的任务，例如"用 <你的某个技能名> 技能 …"，应看到 skill_search / skill_read 被调用；');
-  console.log("  · Claude Code 可用 `claude mcp list` 确认 askill 显示 Connected。");
-  console.log("回滚：`claude mcp remove askill`；Kimi 删除 mcp.json 中的 askill 条目（有自动备份）。");
+  console.log("  · Claude Code 可用 `claude mcp list` 确认 skillware 显示 Connected。");
+  console.log("回滚：`claude mcp remove skillware`；Kimi 删除 mcp.json 中的 skillware 条目（有自动备份）。");
   process.exit(results.every(Boolean) ? 0 : 1);
 }
 

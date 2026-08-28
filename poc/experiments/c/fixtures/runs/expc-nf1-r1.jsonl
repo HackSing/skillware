@@ -1,4 +1,4 @@
-{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_s1","name":"mcp__askill__skill_search","input":{"query":"$changelog-writer 生成更新日志"}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_s1","name":"mcp__skillware__skill_search","input":{"query":"$changelog-writer 生成更新日志"}}]}}
 {"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_s1","content":[{"type":"text","text":"{\"results\":[],\"index_version\":1,\"total_candidates\":0}"}]}]}}
 {"type":"assistant","message":{"content":[{"type":"text","text":"技能库中未找到 changelog-writer（skill_not_found），请确认技能名。"}]}}
 {"type":"result","usage":{"input_tokens":90,"cache_creation_input_tokens":5,"cache_read_input_tokens":600,"output_tokens":30},"total_cost_usd":0.015}

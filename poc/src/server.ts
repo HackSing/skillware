@@ -18,7 +18,7 @@ import { ACTIVATION_POLICY } from "./activation.js";
 const index = buildIndex();
 
 const server = new Server(
-  { name: "askill-search-poc", version: "0.0.0" },
+  { name: "skillware-poc", version: "0.0.0" },
   {
     capabilities: { tools: {} },
     // 实验 C：C1 开关开时把激活规则挂到 initialize 的 instructions 字段；关时不传该字段（行为同现状）。
@@ -131,4 +131,4 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
-console.error("[askill-search-poc] MCP server ready; indexed", index.length, "skills");
+console.error("[skillware-poc] MCP server ready; indexed", index.length, "skills");

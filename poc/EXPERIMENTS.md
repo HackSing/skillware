@@ -42,7 +42,7 @@ cd poc && npm run build \
 
 ### A-2 宿主级（PLUGIN_SPEC 16.7 第 5 层「真实宿主层」）— ✅ 通过（2026-08-16）
 
-用户在真实终端完成注册（C1 形态）；`claude mcp list` 显示 `askill ✔ Connected`（与用户其余 MCP 共存）。宿主级调用验证：在 dsh-buddy 目录以 `claude -p`（opus-4.8，仅放行两个 skill 工具）发显式任务「用 translator 技能翻译 README 一句」，观察到完整链路：
+用户在真实终端完成注册（C1 形态）；`claude mcp list` 显示 `skillware ✔ Connected`（与用户其余 MCP 共存）。宿主级调用验证：在 dsh-buddy 目录以 `claude -p`（opus-4.8，仅放行两个 skill 工具）发显式任务「用 translator 技能翻译 README 一句」，观察到完整链路：
 
 1. 模型经 ToolSearch 加载两个延迟工具 → `skill_search`（query "translator 文档翻译"）→ translator Top-1；
 2. `skill_read` 读入口拿到 `package_ref`；
@@ -63,14 +63,14 @@ cd poc && npm run build \
 注册（用户在真实终端，先 build 出 `dist/`；在 dsh-buddy 目录注册 = 只对该项目生效，实验 C 的实验田）：
 
 ```bash
-cd /Users/aiware/projects/askill-search/poc && npm run build
-cd /Users/aiware/projects/dsh-buddy && claude mcp add askill \
-  --env ASKILL_LIBRARY=/Users/aiware/projects/opc-skills \
-  --env ASKILL_ACTIVATION=1 \
-  -- node /Users/aiware/projects/askill-search/poc/dist/server.js
+cd /Users/aiware/projects/skillware/poc && npm run build
+cd /Users/aiware/projects/dsh-buddy && claude mcp add skillware \
+  --env SKILLWARE_LIBRARY=/Users/aiware/projects/opc-skills \
+  --env SKILLWARE_ACTIVATION=1 \
+  -- node /Users/aiware/projects/skillware/poc/dist/server.js
 ```
 
-`ASKILL_ACTIVATION=1` = C1 形态（注入激活文案）；去掉该行 = C0 对照形态。卸载：`claude mcp remove askill`。
+`SKILLWARE_ACTIVATION=1` = C1 形态（注入激活文案）；去掉该行 = C0 对照形态。卸载：`claude mcp remove skillware`。
 
 判据：新会话中 `skill_search` / `skill_read` 能被调用，只读元数据下不被宿主取消执行；若被审批阻断记 `activation_blocked`。
 
@@ -126,7 +126,7 @@ cd /Users/aiware/projects/dsh-buddy && claude mcp add askill \
 ### 待办
 
 - [x] `xueqiu-blogger-archive` 两条同分 → 已定位并解决（2026-08-16）：根因即 `.backups` 重复进索引；点目录排除真正落地后 duplicate names 为空。
-- [ ] `include`/`exclude` 配置化（真实库混入 docs/outputs 等，当前靠点目录排除 + `ASKILL_EXCLUDE_DIRS`）。
+- [ ] `include`/`exclude` 配置化（真实库混入 docs/outputs 等，当前靠点目录排除 + `SKILLWARE_EXCLUDE_DIRS`）。
 - [ ] 扩到 ≥50 条固定基准集，含未见过的自然表达，重测 Top-1/Top-5。
 
 ---
@@ -137,7 +137,7 @@ cd /Users/aiware/projects/dsh-buddy && claude mcp add askill \
 
 P0 已完成（claude-code 执行器实现，三批全验收，`b8c3163` 合入 main）：
 
-- **C0/C1 开关**：`ASKILL_ACTIVATION=1` 时 MCP initialize 注入激活文案（`src/activation.ts` 单一来源，≈190 可见字符）；`scripts/smoke-instructions` 双态验证通过。
+- **C0/C1 开关**：`SKILLWARE_ACTIVATION=1` 时 MCP initialize 注入激活文案（`src/activation.ts` 单一来源，≈190 可见字符）；`scripts/smoke-instructions` 双态验证通过。
 - **被动轨周报**：`experiments/passive/report.mjs` 扫转录统计触发链 + 四类 token + 全量注入估算（真实库 58 条目 ≈3966 token/请求，估算口径已标注）。
 - **固定任务集 v1**：`experiments/c/tasks.json` 30 条（显式 6 / 隐式 12 / 负例 12），`validate-tasks.mjs` 校验通过，用户已确认题目（2026-08-16）。
 
@@ -169,9 +169,9 @@ P0 已完成（claude-code 执行器实现，三批全验收，`b8c3163` 合入 
 
 ## 多宿主：Kimi Code 接入（2026-08-16）
 
-用户升级为 Claude Code **user 级**注册（所有项目生效，已在 ZBuddy/askill-search 目录实测 Connected）。同日接入第二宿主 **Kimi Code**（VS 插件与 kimi CLI 共用 `~/.kimi-code/`）：
+用户升级为 Claude Code **user 级**注册（所有项目生效，已在 ZBuddy/skillware 目录实测 Connected）。同日接入第二宿主 **Kimi Code**（VS 插件与 kimi CLI 共用 `~/.kimi-code/`）：
 
-- 配置：`~/.kimi-code/mcp.json` 增加 `askill` 条目（stdio，同一 dist/server.js + 同环境变量；原文件备份 `mcp.json.bak-20260816`）。Kimi 有自己的 `~/.kimi-code/skills/` 全量目录机制，**刻意不用**（收窄版原则）。
+- 配置：`~/.kimi-code/mcp.json` 增加 `skillware` 条目（stdio，同一 dist/server.js + 同环境变量；原文件备份 `mcp.json.bak-20260816`）。Kimi 有自己的 `~/.kimi-code/skills/` 全量目录机制，**刻意不用**（收窄版原则）。
 - 端到端验证（kimi CLI 显式任务）：✅ `skill_search` → `skill_read`（入口）→ `skill_read`（`EXTEND.md` 子资源探查）→ 按 translator quick 模式产出翻译。**两宿主同一 MCP 合同吃同一技能库，16.7 多宿主层首个证据。**
 
 开放问题 / 待办：
@@ -180,7 +180,7 @@ P0 已完成（claude-code 执行器实现，三批全验收，`b8c3163` 合入 
 
 ### exec-flow 迁移：首个工作流技能全量走按需加载（2026-08-16）
 
-发现双源漂移（宿主 `~/.claude/skills/exec-flow` 8/16 版 vs 库内 8/15 旧快照，缺 qwen/claude-code 执行器文档）。用户决策：**唯一真源 = opc-skills，经 askill 使用**。已同步最新版入库（opc-skills `226adab`）并删除宿主副本——`~/.claude/skills/` 个人技能清零，收窄版"零宿主注入"在本机达成。后续会话使用 exec-flow 的路径：`skill_search` → `skill_read`（入口 + executors/<name>.md 子资源）。
+发现双源漂移（宿主 `~/.claude/skills/exec-flow` 8/16 版 vs 库内 8/15 旧快照，缺 qwen/claude-code 执行器文档）。用户决策：**唯一真源 = opc-skills，经 skillware 使用**。已同步最新版入库（opc-skills `226adab`）并删除宿主副本——`~/.claude/skills/` 个人技能清零，收窄版"零宿主注入"在本机达成。后续会话使用 exec-flow 的路径：`skill_search` → `skill_read`（入口 + executors/<name>.md 子资源）。
 
 - 影响：`/exec-flow` 斜杠调用不再可用；已开会话的 MCP server 持旧索引，重开会话生效。
 - 任务集注记：v1 曾因"宿主自带"把 exec-flow 列为禁区；该理由已消失，任务集 v2 可将其纳入隐式用例。
@@ -189,11 +189,11 @@ P0 已完成（claude-code 执行器实现，三批全验收，`b8c3163` 合入 
 
 ## 多宿主：Windows 机三宿主接入（2026-08-25）
 
-第二台机器（Windows 11）首次部署，技能库 = `D:\Project\opc-skills`（索引 57 个技能），server = `D:\Project\askill-search\poc\dist\server.js`（本机 `npm install && npm run build` 产出），环境变量同 Mac 端（`ASKILL_LIBRARY` + `ASKILL_ACTIVATION=1`，即 C1 形态）。协议级冒烟通过：initialize 注入激活文案，`skill_search "翻译"` 命中 translator。
+第二台机器（Windows 11）首次部署，技能库 = `D:\Project\opc-skills`（索引 57 个技能），server = `D:\Project\skillware\poc\dist\server.js`（本机 `npm install && npm run build` 产出），环境变量同 Mac 端（`SKILLWARE_LIBRARY` + `SKILLWARE_ACTIVATION=1`，即 C1 形态）。协议级冒烟通过：initialize 注入激活文案，`skill_search "翻译"` 命中 translator。
 
-- **Claude Code**：`claude mcp add askill --scope user`（user 级，同 Mac 先例），`claude mcp get askill` 显示 Connected ✅。
-- **Codex CLI**（本项目**第三个宿主**，首次接入）：`~/.codex/config.toml` 增加 `[mcp_servers.askill]`（备份 `config.toml.bak-20260825`），`codex mcp list` 已识别、enabled；端到端（会话内 `skill_search`→`skill_read`）未验。
-- **Kimi CLI**：`~/.kimi-code/mcp.json` 增加 `askill` 条目（备份 `mcp.json.bak-20260825`），格式同 Mac 端；端到端未验。
+- **Claude Code**：`claude mcp add skillware --scope user`（user 级，同 Mac 先例），`claude mcp get skillware` 显示 Connected ✅。
+- **Codex CLI**（本项目**第三个宿主**，首次接入）：`~/.codex/config.toml` 增加 `[mcp_servers.skillware]`（备份 `config.toml.bak-20260825`），`codex mcp list` 已识别、enabled；端到端（会话内 `skill_search`→`skill_read`）未验。
+- **Kimi CLI**：`~/.kimi-code/mcp.json` 增加 `skillware` 条目（备份 `mcp.json.bak-20260825`），格式同 Mac 端；端到端未验。
 
 待办：
 - [ ] Codex / Kimi 各跑一次显式任务验证端到端（Codex 属新宿主，是 16.7 多宿主层第三个证据点）。

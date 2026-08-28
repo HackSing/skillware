@@ -13,7 +13,7 @@
 |---|---|
 | 宿主 | Claude Code（收窄版目标宿主，与 A-2 同一宿主） |
 | 工作目录 | `/Users/aiware/projects/dsh-buddy`（带真实的 12KB CLAUDE.md、docs-harness 规则等真实上下文噪声） |
-| 技能库 | `/Users/aiware/projects/opc-skills`（58 个真实技能，经 `ASKILL_LIBRARY` 指入 POC MCP） |
+| 技能库 | `/Users/aiware/projects/opc-skills`（58 个真实技能，经 `SKILLWARE_LIBRARY` 指入 POC MCP） |
 | 任务来源 | dsh-buddy 的真实开发需求（翻译 README、出应用图标、审查预装插件、升级依赖、写发布文案……） |
 
 **注意**：dsh-buddy 只是被开发的对象和任务素材来源，不改其产品代码；它 preset 里自带的 `skill-search.mjs` 与本实验无关（那是 dsh 宿主内的另一套机制）。
@@ -22,8 +22,8 @@
 
 ## 2. 前置条件（P0，一次性）
 
-1. **A-2 宿主级注册**：在 dsh-buddy 项目注册 POC MCP（项目级 `.mcp.json` 或 `claude mcp add`），`ASKILL_LIBRARY=/Users/aiware/projects/opc-skills`。验证新会话中两工具可调、readOnly 元数据下审批体验可接受。这是 EXPERIMENTS.md 里 A-2 的执行，顺带完成。
-2. **POC 增加 MCP `instructions` 支持**：server 构造时可通过环境变量（如 `ASKILL_ACTIVATION=1`）注入 ≤500 字符激活规则。Claude Code 会把 MCP server instructions 注入系统提示——该机制已在现实会话中确认存在（"MCP Server Instructions" 区块）。这是 C1 臂的开关。
+1. **A-2 宿主级注册**：在 dsh-buddy 项目注册 POC MCP（项目级 `.mcp.json` 或 `claude mcp add`），`SKILLWARE_LIBRARY=/Users/aiware/projects/opc-skills`。验证新会话中两工具可调、readOnly 元数据下审批体验可接受。这是 EXPERIMENTS.md 里 A-2 的执行，顺带完成。
+2. **POC 增加 MCP `instructions` 支持**：server 构造时可通过环境变量（如 `SKILLWARE_ACTIVATION=1`）注入 ≤500 字符激活规则。Claude Code 会把 MCP server instructions 注入系统提示——该机制已在现实会话中确认存在（"MCP Server Instructions" 区块）。这是 C1 臂的开关。
 
 ## 3. 实验臂
 
@@ -71,7 +71,7 @@ claude -p "<任务文本>" \
 
 - **模型固定 Opus 4.8**（用户日常开发同款；主动轨与被动轨同模型，数据可互相印证）。
 - **worktree + bypassPermissions**：任务可能真实改文件（升级依赖等），在一次性 worktree 里放开权限让模型自然行动，跑完丢弃。不在真实 dsh-buddy 工作区跑批。
-- **--strict-mcp-config**：批跑只挂 askill MCP，排除用户其它 MCP 的不稳定注入；项目/全局 CLAUDE.md 与宿主自带技能列表保持原样（真实噪声保留）。
+- **--strict-mcp-config**：批跑只挂 skillware MCP，排除用户其它 MCP 的不稳定注入；项目/全局 CLAUDE.md 与宿主自带技能列表保持原样（真实噪声保留）。
 - **--max-turns 4（负例 3）**：判定只看轨迹前段——search → read → 开始干活是 3 轮，4 轮封顶足够；负例只需确认前几轮没搜。
 - **判定脚本**：解析 stream-json 中的 `tool_use` 事件，抽取 `skill_search`/`skill_read` 调用、query、轮次序号，对照 tasks.json 自动出指标。人工抽查 10% 核对判定器。
 - **重复次数按臂区分预算**：C1 是要出结论的臂，重复给足；C0 是对照，只需看出差距方向，每任务 1 次。

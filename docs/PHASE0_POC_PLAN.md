@@ -1,4 +1,4 @@
-# askill-search 阶段 0 最小验证骨架方案
+# skillware 阶段 0 最小验证骨架方案
 
 > 文档状态：待执行
 > 方案日期：2026-08-16
@@ -63,7 +63,7 @@ Core 与 MCP 部分保持**宿主无关**；只有实验 B/C 的具体操作（�
 ## 5. 最小骨架结构
 
 ```text
-askill-search/
+skillware/
 ├── docs/
 │   └── PHASE0_POC_PLAN.md        # 本文件
 ├── poc/

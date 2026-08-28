@@ -1,5 +1,5 @@
 // 用真实技能库（opc-skills）跑召回，验证收窄版可用性。
-// server 经 ASKILL_LIBRARY 指向真实库；索引数从 server stderr 打印。
+// server 经 SKILLWARE_LIBRARY 指向真实库；索引数从 server stderr 打印。
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "node:path";
@@ -27,7 +27,7 @@ async function main() {
     const transport = new StdioClientTransport({
         command: "node",
         args: [serverPath],
-        env: { ...process.env, ASKILL_LIBRARY: LIB },
+        env: { ...process.env, SKILLWARE_LIBRARY: LIB },
         stderr: "inherit", // 让 server 的 "indexed N skills" 显示
     });
     const client = new Client({ name: "inspect", version: "0.0.0" });
